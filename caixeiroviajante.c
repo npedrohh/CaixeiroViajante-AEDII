@@ -334,9 +334,10 @@ void caixeiroAux(Grafo*g, int atual, int numVisitados){
 
   bool finalizado = (numVisitados == numeroDeVertices(g) && arestaExiste(g, cicloAtual[numVisitados-1], 0));
 
+  // Verificação se Estado Atual = Estado Final
   if(finalizado){
 
-
+    // Verificação se essa solução é a solução ideal
     if(valorAtual + pesoAresta(g, cicloAtual[numVisitados-1], 0) < melhorValor){
 
       melhorValor = valorAtual + pesoAresta(g, cicloAtual[numVisitados-1], 0);
@@ -345,30 +346,31 @@ void caixeiroAux(Grafo*g, int atual, int numVisitados){
     }
   }
 
+  // Criação de lista de vizinhos do vértice atual e marcação do vértice atual como vértice já visitado
   PONT vizinhoAtual = listaDeVizinhos(g, atual);
   visitado[atual] = 1;
 
+  // Todas as possibilidades de caminho que podem ser seguidas
   while(!finalizado && vizinhoAtual){
 
+    // Condição de caminho aceitável
     if(!visitado[vizinhoAtual->vertice]){
 
+      // Atualização de estado
       valorAtual+= vizinhoAtual->peso;
       cicloAtual[numVisitados] = vizinhoAtual->vertice;
 
       caixeiroAux(g, vizinhoAtual->vertice, numVisitados+1);
-
-      finalizado = (numVisitados == numeroDeVertices(g) && arestaExiste(g, cicloAtual[numVisitados-1], 0));
-
-      if(!finalizado){
-
-        visitado[vizinhoAtual->vertice] = 0;
-        valorAtual-= vizinhoAtual->peso;
-      } else return;
+  
+      // Retorna para estado anterior
+      visitado[vizinhoAtual->vertice] = 0;
+      valorAtual-= vizinhoAtual->peso;
     }
 
     vizinhoAtual = vizinhoAtual->prox;
   }
 
+  // Como a lista foi alocada manualmente, deve ser também liberada manualmente
   liberaLista(vizinhoAtual);
 }
 
@@ -399,6 +401,59 @@ bool caixeiroViajante(Grafo* g){
 /* Funcao main para realizar alguns testes iniciais sobre o EP 2.
 */
 int main() {
+  Grafo g1;
+  inicializaGrafo(&g1, 1);
+  printf("\n##### Primeiro problema: uma cidade e nenhuma aresta (nao ha solucao).\n");
+  exibeGrafo(&g1);
+  if (caixeiroViajante(&g1)){
+    printf("Custo encontrado: %.2f\n", melhorValor); 
+    exibeCiclo(melhorCiclo, g1.numVertices);
+  }else printf("Nenhuma solucao foi encontrada.\n");
+
+  printf("\n##### Segundo problema: uma cidade e uma aresta (ha solucao).\n");
+  insereAresta(&g1, 0, 0, 5);
+  exibeGrafo(&g1);
+  if (caixeiroViajante(&g1)){
+    printf("Custo encontrado: %.2f\n", melhorValor); 
+    exibeCiclo(melhorCiclo, g1.numVertices);
+  }else printf("Nenhuma solucao foi encontrada.\n");
+
+
+  Grafo g2;
+  inicializaGrafo(&g2, 2);
+  insereAresta(&g2, 0, 1, 3);
+  insereAresta(&g2, 1, 1, 5);
+  printf("\n##### Terceiro problema: duas cidades (nao ha solucao).\n");
+  exibeGrafo(&g2);
+  if (caixeiroViajante(&g2)){
+    printf("Custo encontrado: %.2f\n", melhorValor); 
+    exibeCiclo(melhorCiclo, g2.numVertices);
+  }else printf("Nenhuma solucao foi encontrada.\n");
+
+  printf("\n##### Quarto problema: duas cidades (ha solucao).\n");
+  insereAresta(&g2, 1, 0, 7);
+  exibeGrafo(&g2);
+  if (caixeiroViajante(&g2)){
+    printf("Custo encontrado: %.2f\n", melhorValor); 
+    exibeCiclo(melhorCiclo, g2.numVertices);
+  }else printf("Nenhuma solucao foi encontrada.\n");
+
+
+  printf("\n##### Quinto problema: tres cidades (ha mais de uma solucao, mas apenas uma otima).\n");
+  Grafo g3;
+  inicializaGrafo(&g3, 3);
+  insereAresta(&g3, 0, 1, 32);
+  insereAresta(&g3, 0, 2, 16);
+  insereAresta(&g3, 1, 0, 8);
+  insereAresta(&g3, 1, 2, 4);
+  insereAresta(&g3, 2, 0, 2);
+  insereAresta(&g3, 2, 1, 1);
+  exibeGrafo(&g3);
+  if (caixeiroViajante(&g3)){
+    printf("Custo encontrado: %.2f\n", melhorValor); 
+    exibeCiclo(melhorCiclo, g3.numVertices);
+  }else printf("Nenhuma solucao foi encontrada.\n");
+
 
   printf("\n##### Sexto problema: quatro cidades (ha mais de uma solucao, mas apenas uma otima).\n");
   Grafo g4;
@@ -416,6 +471,17 @@ int main() {
     printf("Custo encontrado: %.2f\n", melhorValor); 
     exibeCiclo(melhorCiclo, g4.numVertices);
   }else printf("Nenhuma solucao foi encontrada.\n");
+
+
+  printf("\n##### Setimo problema: grafo gerado aleatoriamente (pode ou nao ter solucoes).\n");
+  Grafo* g5 = criaGrafoAleatorio(10, 30);
+  exibeGrafo(g5);
+  if (caixeiroViajante(g5)){
+    printf("Custo encontrado: %.2f\n", melhorValor); 
+    exibeCiclo(melhorCiclo, g5->numVertices);
+  }else printf("Nenhuma solucao foi encontrada.\n");
+
+
 
   return 0;  
 }
