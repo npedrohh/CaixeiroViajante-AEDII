@@ -369,9 +369,6 @@ void caixeiroAux(Grafo*g, int atual, int numVisitados){
 
     vizinhoAtual = vizinhoAtual->prox;
   }
-
-  // Como a lista foi alocada manualmente, deve ser também liberada manualmente
-  liberaLista(vizinhoAtual);
 }
 
 
